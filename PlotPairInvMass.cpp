@@ -84,7 +84,7 @@ void PlotPairInvMass(const std::string& result_file_path = "slight.out") {
     events_info_text->Draw();
     peak_info_text->Draw();
 
-    // Save plot to TEX file (<string> is included in starlyze.cpp)
+    // Save plot to TEX file
     std::string file_name = results.repr_str + std::string("_pair_inv_mass.tex");
     canvas->Print(file_name.c_str());
 }

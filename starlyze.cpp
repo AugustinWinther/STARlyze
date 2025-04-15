@@ -6,14 +6,37 @@
 #include <sstream>   // std::istringstream
 #include <algorithm> // std::sort, std::shuffle
 
-// Constanta
-static constexpr double kPROTON_MASS = 0.93827208816;
+// Constants 
+static constexpr double kELECTRON_MASS = 0.000510998928;
+static constexpr double kPROTON_MASS = 0.938272046;
+static constexpr double kMUON_MASS = 0.1056583755;
+static constexpr double kPION_MASS = 0.13957018;
+static constexpr double kKAON_MASS = 0.493677;
+
+// Particle IDs follow the PDG format
+enum ParticleId { 
+    kELECTRON_ID = 11,
+    kPROTON_ID = 2212,
+    kMUON_ID = 13,
+    kPION_ID = 211,
+    kKAON_ID = 321
+};
+
+// DecayID (PROD_PID in STARlight) follows STARlight numbering scheme
+enum DecayId { 
+    kJPSI_2K2PI = 443321211,
+    kJPSI_4PI = 443211,
+    kJPSI_2MU = 443013,
+    kJPSI_2E = 443011,
+    kJPSI_2P = 4432212,
+};
 
 // Initialize RNG stuff
 auto kRNG = std::default_random_engine {};
 
-double FreedmanDiaconisBinWidth(std::vector<double> data) 
-{
+// Returns optimal bin-width for data. 
+// Used for plotting histograms in ROOT Macros
+double FreedmanDiaconisBinWidth(std::vector<double> data) {
     std::sort(data.begin(), data.end());
     const double q1 = data[data.size() / 4];
     const double q3 = data[3 * data.size() / 4];
@@ -22,9 +45,9 @@ double FreedmanDiaconisBinWidth(std::vector<double> data)
     return bin_width;
 }
 
+// Returns vector containg sub-strings seperated by passed delimiter
 std::vector<std::string> SplitStringBy(const std::string& string, 
-                                       const char& delimiter) 
-{
+                                       const char& delimiter) {
     std::vector<std::string> string_segments;
     std::istringstream string_stream(string);
     std::string segment;
@@ -36,33 +59,31 @@ std::vector<std::string> SplitStringBy(const std::string& string,
     return string_segments;
 }
 
-double ParticleIdToMass(const int& mcid) {
-    // Returns the mass in GeV of the particle with the given
-    // particle ID. Negative numbers are the anti-particle variant
-    // and has the same mass, only different charge.
-    // IDs follows the PDG mcid format.
+// Returns the mass in GeV of the particle with the given
+// particle ID. Negative numbers are the anti-particle variant.
+double ParticleIdToMass(const int& particle_id) {
     double mass;
 
-    switch (mcid) {
-        case   11:  // e-
-        case  -11:  // e+
-            mass = 0.0005109989499999999; 
+    switch (particle_id) {
+        case  kELECTRON_ID:  // e-
+        case -kELECTRON_ID:  // e+
+            mass = kELECTRON_MASS; 
             break;
-        case   13:  // mu-
-        case  -13:  // mu+
-            mass = 0.1056583755;    
+        case  kPROTON_ID:  // p
+        case -kPROTON_ID:  // pbar
+            mass = kPROTON_MASS; 
+            break;
+        case  kMUON_ID:  // mu-
+        case -kMUON_ID:  // mu+
+            mass = kMUON_MASS;    
             break;    
-        case  211:  // pi+
-        case -211:  // pi-
-            mass = 0.139570390983681;   
+        case  kPION_ID:  // pi+
+        case -kPION_ID:  // pi-
+            mass = kPION_MASS;  
             break;
-        case  321:  // K+
-        case -321:  // K-
-            mass = 0.49367659945804093; 
-            break;
-        case  2212:  // p
-        case -2212:  // pbar
-            mass = 0.93827208816; 
+        case  kKAON_ID:  // K+
+        case -kKAON_ID:  // K-
+            mass = kKAON_MASS; 
             break;
         default: 
             mass = 0; 
@@ -72,15 +93,16 @@ double ParticleIdToMass(const int& mcid) {
     return mass;
 }
 
+// Returns string reprsentation of the decay
 std::string DecayIdToReprStr(const int& decay_id) {
     std::string repr_str;
 
     switch (decay_id) {
-        case 443211:  // J/psi --> pi+pi-pi+pi-
-            repr_str = std::string("jpsi_4pi"); 
-            break;   
-        case 443321211: // J/psi --> K+K-pi+pi-
+        case kJPSI_2K2PI: // J/psi -> K+ K- pi+ pi-
             repr_str = std::string("jpsi_2K2pi"); 
+            break;   
+        case kJPSI_4PI:   // J/psi -> pi+ pi- pi+ pi-
+            repr_str = std::string("jpsi_4pi"); 
             break;   
         default: 
             repr_str = std::string("NoReprStrFound"); 
@@ -90,27 +112,28 @@ std::string DecayIdToReprStr(const int& decay_id) {
     return repr_str; 
 }
 
+// Returns LaTeX reprsentation of the decay
 std::string DecayIdToLatexStr(const int& decay_id) {
     std::string latex_str;
 
     switch (decay_id) {
-        case  443011:  // J/psi --> e+e-
-            latex_str = std::string("J/#psi #rightarrow e^{+}e^{-}"); 
-            break;
-        case  443013:  // J/Psi --> mu+mu-
-            latex_str = std::string("J/#psi #rightarrow #mu^{+}#mu^{-}"); 
-            break;   
-        case 443211:  // J/psi --> pi+pi-pi+pi-
+        case kJPSI_2K2PI: // J/psi -> K+ K- pi+ pi-
+            latex_str = std::string("J/\\psi \\rightarrow K^{+}K^{-}\\pi^{+}\\pi^{-}"); 
+            break; 
+        case kJPSI_4PI:   // J/psi -> pi+ pi- pi+ pi-
             latex_str = std::string("J/\\psi \\rightarrow \\pi^{+}\\pi^{-}\\pi^{+}\\pi^{-}"); 
             break;   
-        case 443321211:  // J/psi --> pi+pi-K+K-
-            latex_str = std::string("J/\\psi \\rightarrow K^{+}K^{-}\\pi^{+}\\pi^{-}"); 
-            break;   
-        case 4432212:  // J/psi --> proton anti-proton
-            latex_str = std::string("J/#psi #rightarrow p#bar{p}"); 
+        case  kJPSI_2MU:  // J/Psi -> mu+ mu-
+            latex_str = std::string("J/\\psi \\rightarrow \\mu^{+}\\mu^{-}"); 
+            break;     
+        case  kJPSI_2E:   // J/psi -> e+ e-
+            latex_str = std::string("J/\\psi \\rightarrow e^{+}e^{-}"); 
+            break;
+        case kJPSI_2P:   // J/psi -> p pbar
+            latex_str = std::string("J/\\psi \\rightarrow p\\overline{p}"); 
             break;
         default: 
-            latex_str = std::string("NO JETSET ID FOUND"); 
+            latex_str = std::string("NO DECAY ID FOUND"); 
             break;
     }
 

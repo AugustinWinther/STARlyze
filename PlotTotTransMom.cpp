@@ -59,7 +59,7 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     hist->Draw();
     events_info_text->Draw();
 
-    // Save plot to TEX file (<string> is included in starlyze.cpp)
+    // Save plot to TEX file
     std::string file_name = results.repr_str + std::string("_tot_trans_mom.tex");
     canvas->Print(file_name.c_str());
 }

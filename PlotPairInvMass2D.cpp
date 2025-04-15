@@ -1,7 +1,6 @@
 // ROOT Includes
 #include "TH2D.h"
 #include "TCanvas.h"
-#include "TColor.h"
 #include "TLatex.h"
 
 // Local Includes
@@ -69,7 +68,7 @@ void PlotPairInvMass2D(const std::string& result_file_path = "slight.out") {
     hist->Draw("COLZ");
     events_info_text->Draw();
 
-    // Save plot to TEX file (<string> is included in starlyze.cpp)
+    // Save plot to TEX file
     std::string file_name = results.repr_str + std::string("_pair_inv_mass_2d.tex");
     canvas->Print(file_name.c_str());
 }
