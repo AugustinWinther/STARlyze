@@ -11,8 +11,8 @@ void PlotPairInvMass(const std::string& result_file_path = "slight.out") {
     const SimulationResult results = ReadSimulationResults(result_file_path);
 
     // Create title for plot
-    char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s", 
-                       results.sqrt_s_NN/1000, results.decay_latex_str.c_str());
+    const char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s", 
+                             results.sqrt_s_NN/1000, results.decay_latex_str.c_str());
 
     // Collapse m_inv_pair_list to 1D vector
     std::vector<double> inv_masses;
@@ -85,6 +85,6 @@ void PlotPairInvMass(const std::string& result_file_path = "slight.out") {
     peak_info_text->Draw();
 
     // Save plot to TEX file
-    std::string file_name = results.repr_str + std::string("_pair_inv_mass.tex");
+    const std::string file_name = results.repr_str + std::string("_pair_inv_mass.tex");
     canvas->Print(file_name.c_str());
 }

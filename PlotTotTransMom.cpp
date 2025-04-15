@@ -11,8 +11,8 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     const SimulationResult results = ReadSimulationResults(result_file_path);
 
     // Create title for plot
-    char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s", 
-                       results.sqrt_s_NN/1000, results.decay_latex_str.c_str());
+    const char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s", 
+                             results.sqrt_s_NN/1000, results.decay_latex_str.c_str());
 
     // Calculate histogram properties
     const double min = std::min_element(results.p_trans_list.begin(), 
@@ -60,6 +60,6 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     events_info_text->Draw();
 
     // Save plot to TEX file
-    std::string file_name = results.repr_str + std::string("_tot_trans_mom.tex");
+    const std::string file_name = results.repr_str + std::string("_tot_trans_mom.tex");
     canvas->Print(file_name.c_str());
 }
