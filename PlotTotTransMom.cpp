@@ -2,7 +2,6 @@
 #include "TH1D.h"
 #include "TCanvas.h"
 #include "TLatex.h"
-#include "TText.h"
 
 // Local Includes
 #include "starlyze.cpp" 
@@ -12,9 +11,8 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     const SimulationResult results = ReadSimulationResults(result_file_path);
 
     // Create title for plot
-    char* title = Form("STARlight | Pb-Pb #sqrt{s_{NN}} = %.2f TeV | %s ", 
-                       results.sqrt_s_NN/1000, 
-                       results.decay_latex_str.c_str());
+    char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s", 
+                       results.sqrt_s_NN/1000, results.decay_latex_str.c_str());
 
     // Calculate histogram properties
     const double min = std::min_element(results.p_trans_list.begin(), 
@@ -32,25 +30,26 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
         hist->Fill(p_trans);
     }
 
-    // Text information about the amount of events
-    const char *e_info = Form("%i events", results.n_events);
-    TText *e_info_text = new TText(0.70, 0.65, e_info);
-    e_info_text->SetNDC();
-    e_info_text->SetTextSize(0.04);
+    // Text information about amount of events
+    const char *events_info = Form("\\text{%i events}", results.n_events);
+    TLatex *events_info_text = new TLatex(0.70, 0.65, events_info);
+    events_info_text->SetNDC();
+    events_info_text->SetTextAlign(0);
+    events_info_text->SetTextSize(0.04);
 
     // Create a canvas to draw on
     TCanvas *canvas = new TCanvas("canvas", "", 900, 700);
 
     // Draw histograms and info texts
     hist->SetStats(kFALSE);
-    hist->SetXTitle("4 Particle Transverse Momentum  [GeV/c]");
-    hist->SetYTitle(Form("Counts per %.2f [MeV/c]", bin_width*1000));
+    hist->SetXTitle("\\text{4 Particle Transverse Momentum  [GeV/c]}");
+    hist->SetYTitle(Form("\\text{Counts per %.2f [MeV/c]}", bin_width*1000));
     hist->SetAxisRange(0, 0.25);
     hist->SetAxisRange(0, hist->GetBinContent(hist->GetMaximumBin())*1.1, "Y");
     hist->GetXaxis()->CenterTitle();
     hist->GetYaxis()->CenterTitle();
-    hist->GetXaxis()->SetTitleOffset(0.8);
-    hist->GetYaxis()->SetTitleOffset(1.0);
+    hist->GetXaxis()->SetTitleOffset(1.0);
+    hist->GetYaxis()->SetTitleOffset(1.2);
     hist->GetXaxis()->SetLabelSize(0.035);
     hist->GetYaxis()->SetLabelSize(0.04);
     hist->GetXaxis()->SetTitleSize(0.05);
@@ -58,8 +57,9 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     hist->SetLineColor(kBlack);
     hist->SetFillColor(kP10Blue);
     hist->Draw();
-    e_info_text->Draw();
+    events_info_text->Draw();
 
-    // Save plot to SVG file
-    canvas->Print("PlotTotTransMom.svg");
+    // Save plot to TEX file (<string> is included in starlyze.cpp)
+    std::string file_name = results.repr_str + std::string("_tot_trans_mom.tex");
+    canvas->Print(file_name.c_str());
 }

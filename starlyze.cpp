@@ -6,10 +6,11 @@
 #include <sstream>   // std::istringstream
 #include <algorithm> // std::sort, std::shuffle
 
+// Constanta
+static constexpr double kPROTON_MASS = 0.93827208816;
+
 // Initialize RNG stuff
 auto kRNG = std::default_random_engine {};
-
-static constexpr double kPROTON_MASS = 0.93827208816;
 
 double FreedmanDiaconisBinWidth(std::vector<double> data) 
 {
@@ -71,10 +72,28 @@ double ParticleIdToMass(const int& mcid) {
     return mass;
 }
 
-std::string DecayIdToLatexStr(const int& jetsetid) {
+std::string DecayIdToReprStr(const int& decay_id) {
+    std::string repr_str;
+
+    switch (decay_id) {
+        case 443211:  // J/psi --> pi+pi-pi+pi-
+            repr_str = std::string("jpsi_4pi"); 
+            break;   
+        case 443321211: // J/psi --> K+K-pi+pi-
+            repr_str = std::string("jpsi_2K2pi"); 
+            break;   
+        default: 
+            repr_str = std::string("NoReprStrFound"); 
+            break;
+    }
+
+    return repr_str; 
+}
+
+std::string DecayIdToLatexStr(const int& decay_id) {
     std::string latex_str;
 
-    switch (jetsetid) {
+    switch (decay_id) {
         case  443011:  // J/psi --> e+e-
             latex_str = std::string("J/#psi #rightarrow e^{+}e^{-}"); 
             break;
@@ -82,10 +101,10 @@ std::string DecayIdToLatexStr(const int& jetsetid) {
             latex_str = std::string("J/#psi #rightarrow #mu^{+}#mu^{-}"); 
             break;   
         case 443211:  // J/psi --> pi+pi-pi+pi-
-            latex_str = std::string("J/#psi #rightarrow #pi^{+}#pi^{-}#pi^{+}#pi^{-}"); 
+            latex_str = std::string("J/\\psi \\rightarrow \\pi^{+}\\pi^{-}\\pi^{+}\\pi^{-}"); 
             break;   
         case 443321211:  // J/psi --> pi+pi-K+K-
-            latex_str = std::string("J/#psi #rightarrow K^{+}K^{-}#pi^{+}#pi^{-}"); 
+            latex_str = std::string("J/\\psi \\rightarrow K^{+}K^{-}\\pi^{+}\\pi^{-}"); 
             break;   
         case 4432212:  // J/psi --> proton anti-proton
             latex_str = std::string("J/#psi #rightarrow p#bar{p}"); 
@@ -158,6 +177,7 @@ class SimulationResult {
     public:
     int n_events;
     double sqrt_s_NN;
+    std::string repr_str; 
     std::string decay_latex_str;
     std::vector<double> m_inv_list, p_trans_list;
     std::vector<std::vector<double>> m_inv_pair_list;
@@ -166,7 +186,8 @@ class SimulationResult {
                      const double& beam_1_gamma, const double& beam_2_gamma) {
         
         // Used to display in plots
-        this-> n_events = events.size();
+        this->n_events = events.size();
+        this->repr_str = DecayIdToReprStr(decay_id);
         this->decay_latex_str = DecayIdToLatexStr(decay_id);
 
         // Energy per nucleon (Only protons are accelerated)
