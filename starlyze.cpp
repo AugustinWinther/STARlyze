@@ -32,7 +32,7 @@ enum DecayId {
 };
 
 // Initialize RNG stuff
-auto kRNG = std::default_random_engine {};
+std::default_random_engine kRNG = std::default_random_engine {};
 
 // Returns optimal bin-width for data. 
 // Used for plotting histograms in ROOT Macros
@@ -104,6 +104,15 @@ std::string DecayIdToReprStr(const int& decay_id) {
         case kJPSI_4PI:   // J/psi -> pi+ pi- pi+ pi-
             repr_str = std::string("jpsi_4pi"); 
             break;   
+        case  kJPSI_2MU:  // J/Psi -> mu+ mu-
+            repr_str = std::string("jpsi_2mu"); 
+            break;     
+        case  kJPSI_2E:   // J/psi -> e+ e-
+            repr_str = std::string("jpsi_2e"); 
+            break;
+        case kJPSI_2P:   // J/psi -> p pbar
+            repr_str = std::string("jpsi_2p"); 
+            break;
         default: 
             repr_str = std::string("NoReprStrFound"); 
             break;
@@ -165,25 +174,35 @@ class Event {
         // track is which particle.
         std::shuffle(tracks.begin(), tracks.end(), kRNG);
 
-        // Calculate invariant mass of the system of the first pair of particles
-        const double E1  =  tracks[0].E + tracks[1].E;
-        const double px1 = tracks[0].px + tracks[1].px;
-        const double py1 = tracks[0].py + tracks[1].py;
-        const double pz1 = tracks[0].pz + tracks[1].pz;
+        double E1, E2, px1, px2, py1, py2, pz1, pz2, m_inv_1, m_inv_2;
 
-        const double m_inv_1 = std::sqrt(E1*E1 - px1*px1 - py1*py1 - pz1*pz1);
+        // Calculate invariant mass of the system of the first pair of particles
+        E1  =  tracks[0].E + tracks[1].E;
+        px1 = tracks[0].px + tracks[1].px;
+        py1 = tracks[0].py + tracks[1].py;
+        pz1 = tracks[0].pz + tracks[1].pz;
+
+        m_inv_1 = std::sqrt(E1*E1 - px1*px1 - py1*py1 - pz1*pz1);
         this->m_inv_pair.push_back(m_inv_1);
 
         // Calculate invariant mass of the system of the second pair of particles
-        const double E2  =  tracks[2].E + tracks[3].E;
-        const double px2 = tracks[2].px + tracks[3].px;
-        const double py2 = tracks[2].py + tracks[3].py;
-        const double pz2 = tracks[2].pz + tracks[3].pz;
+        // if there is a second pair
+        if (tracks.size() == 4) {
+            E2  =  tracks[2].E + tracks[3].E;
+            px2 = tracks[2].px + tracks[3].px;
+            py2 = tracks[2].py + tracks[3].py;
+            pz2 = tracks[2].pz + tracks[3].pz;
 
-        const double m_inv_2 = std::sqrt(E2*E2 - px2*px2 - py2*py2 - pz2*pz2);
-        this->m_inv_pair.push_back(m_inv_2);
+            m_inv_2 = std::sqrt(E2*E2 - px2*px2 - py2*py2 - pz2*pz2);
+            this->m_inv_pair.push_back(m_inv_2);
+        } else {
+            E2  = 0;
+            px2 = 0;
+            py2 = 0;
+            pz2 = 0; 
+        }
 
-        // Calculate invariant mass of the system of all four particles
+        // Calculate invariant mass of the system of all particles
         const double  E =  E1 + E2;
         const double px = px1 + px2;
         const double py = py1 + py2;
