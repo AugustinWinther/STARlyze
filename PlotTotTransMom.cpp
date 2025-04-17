@@ -23,7 +23,7 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     const int n_bins = (max - min)/bin_width;
 
     // Create histogram object
-    TH1D *hist = new TH1D("hist", title, n_bins, min, max);
+    TH1D* hist = new TH1D("hist", title, n_bins, min, max);
 
     // Fill histograms
     for (const double& p_trans : results.p_trans_list) {
@@ -31,14 +31,12 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     }
 
     // Text information about amount of events
-    const char *events_info = Form("\\text{%i events}", results.n_events);
-    TLatex *events_info_text = new TLatex(0.70, 0.65, events_info);
+    const char* events_info = Form("\\text{%i events}", results.n_events);
+    TLatex* events_info_text = new TLatex(0.54, 0.80, events_info);
     events_info_text->SetNDC();
-    events_info_text->SetTextAlign(0);
-    events_info_text->SetTextSize(0.04);
 
     // Create a canvas to draw on
-    TCanvas *canvas = new TCanvas("canvas", "", 900, 700);
+    TCanvas* canvas = new TCanvas("canvas", "", 900, 700);
 
     // Draw histograms and info texts
     hist->SetStats(kFALSE);
@@ -60,6 +58,6 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     events_info_text->Draw();
 
     // Save plot to TEX file
-    const std::string file_name = results.repr_str + std::string("_tot_trans_mom.tex");
+    const std::string file_name = results.decay_repr_str + std::string("_tot_trans_mom.tex");
     canvas->Print(file_name.c_str());
 }

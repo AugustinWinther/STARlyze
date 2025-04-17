@@ -16,9 +16,9 @@ void PlotPairInvMass(const std::string& result_file_path = "slight.out") {
 
     // Collapse m_inv_pair_list to 1D vector
     std::vector<double> inv_masses;
-    for (const std::vector<double>& m_inv_pair : results.m_inv_pair_list) {
-        for (const double& m_inv : m_inv_pair) {
-            inv_masses.push_back(m_inv);
+    for (const std::vector<double>& m_inv_pairs : results.m_inv_pairs_list) {
+        for (const double& m_inv_pair : m_inv_pairs) {
+            inv_masses.push_back(m_inv_pair);
         }
     }
 
@@ -31,7 +31,7 @@ void PlotPairInvMass(const std::string& result_file_path = "slight.out") {
     const int n_bins = (max - min)/bin_width;
 
     // Create histogram object
-    TH1D *hist = new TH1D("hist", title, n_bins, min, max);
+    TH1D* hist = new TH1D("hist", title, n_bins, min, max);
 
     // Fill histograms
     for (const double& m_inv : inv_masses) {
@@ -50,21 +50,17 @@ void PlotPairInvMass(const std::string& result_file_path = "slight.out") {
                       - hist->GetXaxis()->GetBinCenter(fwhm_left);
 
     // Text information about amount of events
-    const char *events_info = Form("\\text{%i events}", results.n_events);
-    TLatex *events_info_text = new TLatex(0.55, 0.80, events_info);
+    const char* events_info = Form("\\text{%i events}", results.n_events);
+    TLatex* events_info_text = new TLatex(0.54, 0.80, events_info);
     events_info_text->SetNDC();
-    events_info_text->SetTextAlign(0);
-    events_info_text->SetTextSize(0.04);
 
     // Text information about inv. mass. peak
-    const char *peak_info = Form("\\text{Peak @ %.4f GeV/c}^{2}", hist_peak);
-    TLatex *peak_info_text = new TLatex(0.55, 0.75, peak_info);
+    const char* peak_info = Form("\\text{Peak @ %.4f GeV/c}^{2}", hist_peak);
+    TLatex* peak_info_text = new TLatex(0.54, 0.75, peak_info);
     peak_info_text->SetNDC();
-    peak_info_text->SetTextAlign(0);
-    peak_info_text->SetTextSize(0.04);
 
     // Create a canvas to draw on
-    TCanvas *canvas = new TCanvas("canvas", "", 900, 700);
+    TCanvas* canvas = new TCanvas("canvas", "", 900, 700);
 
     // Draw histograms and info texts
     hist->SetStats(kFALSE);
@@ -85,6 +81,6 @@ void PlotPairInvMass(const std::string& result_file_path = "slight.out") {
     peak_info_text->Draw();
 
     // Save plot to TEX file
-    const std::string file_name = results.repr_str + std::string("_pair_inv_mass.tex");
+    const std::string file_name = results.decay_repr_str + std::string("_pair_inv_mass.tex");
     canvas->Print(file_name.c_str());
 }

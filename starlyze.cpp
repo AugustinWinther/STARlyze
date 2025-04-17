@@ -166,7 +166,7 @@ class Track {
 class Event {
     public:
     double m_inv, p_trans;
-    std::vector<double> m_inv_pair;
+    std::vector<double> m_inv_pairs, pseudo_raps;
 
     Event(std::vector<Track> tracks) {
         // In real life, we don't know which particle is which in the detector.
@@ -183,7 +183,7 @@ class Event {
         pz1 = tracks[0].pz + tracks[1].pz;
 
         m_inv_1 = std::sqrt(E1*E1 - px1*px1 - py1*py1 - pz1*pz1);
-        this->m_inv_pair.push_back(m_inv_1);
+        this->m_inv_pairs.push_back(m_inv_1);
 
         // Calculate invariant mass of the system of the second pair of particles
         // if there is a second pair
@@ -194,7 +194,7 @@ class Event {
             pz2 = tracks[2].pz + tracks[3].pz;
 
             m_inv_2 = std::sqrt(E2*E2 - px2*px2 - py2*py2 - pz2*pz2);
-            this->m_inv_pair.push_back(m_inv_2);
+            this->m_inv_pairs.push_back(m_inv_2);
         } else {
             E2  = 0;
             px2 = 0;
@@ -212,6 +212,11 @@ class Event {
 
         // Calculate transverse momentum of the system of all four particles
         this->p_trans = std::sqrt(px*px + py*py);
+
+        // Add all pseudo rapidities to pseudo rap. list
+        for (const Track& track : tracks){
+            this->pseudo_raps.push_back(track.pseudo_rap);
+        }
     }
 };
 
@@ -219,17 +224,17 @@ class SimulationResult {
     public:
     int n_events;
     double sqrt_s_NN;
-    std::string repr_str; 
+    std::string decay_repr_str; 
     std::string decay_latex_str;
     std::vector<double> m_inv_list, p_trans_list;
-    std::vector<std::vector<double>> m_inv_pair_list;
+    std::vector<std::vector<double>> m_inv_pairs_list, pseudo_raps_list;
 
     SimulationResult(const std::vector<Event>& events, const int& decay_id,
                      const double& beam_1_gamma, const double& beam_2_gamma) {
         
         // Used to display in plots
         this->n_events = events.size();
-        this->repr_str = DecayIdToReprStr(decay_id);
+        this->decay_repr_str = DecayIdToReprStr(decay_id);
         this->decay_latex_str = DecayIdToLatexStr(decay_id);
 
         // Energy per nucleon (Only protons are accelerated)
@@ -237,10 +242,11 @@ class SimulationResult {
         const double beam_2_E_N = kPROTON_MASS*beam_2_gamma;
         this->sqrt_s_NN = beam_1_E_N + beam_2_E_N;
         
-        for (Event event : events) {
+        for (const Event& event : events) {
             this->m_inv_list.push_back(event.m_inv);
-            this->m_inv_pair_list.push_back(event.m_inv_pair);
+            this->m_inv_pairs_list.push_back(event.m_inv_pairs);
             this->p_trans_list.push_back(event.p_trans);
+            this->pseudo_raps_list.push_back(event.pseudo_raps);
         }
     }
 };

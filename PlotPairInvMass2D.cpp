@@ -18,9 +18,9 @@ void PlotPairInvMass2D(const std::string& result_file_path = "slight.out") {
     // Seperate particle pairs invariant mases
     std::vector<double> m_inv_pair_1;
     std::vector<double> m_inv_pair_2;
-    for (const std::vector<double>& m_inv_pair : results.m_inv_pair_list) {
-        m_inv_pair_1.push_back(m_inv_pair[0]);
-        m_inv_pair_2.push_back(m_inv_pair[1]);
+    for (const std::vector<double>& m_inv_pairs : results.m_inv_pairs_list) {
+        m_inv_pair_1.push_back(m_inv_pairs[0]);
+        m_inv_pair_2.push_back(m_inv_pairs[1]);
     }
 
     // Create pair inv mass vs pair inv mass histogram
@@ -34,7 +34,7 @@ void PlotPairInvMass2D(const std::string& result_file_path = "slight.out") {
     const double width_2 = FreedmanDiaconisBinWidth(m_inv_pair_2);
     const int nbins_2 = (max_2 - min_2)/width_2;
 
-    TH2D *hist = new TH2D("hist", title, nbins_1, min_1, max_1, 
+    TH2D* hist = new TH2D("hist", title, nbins_1, min_1, max_1, 
                                          nbins_2, min_2, max_2);
 
     // Fill histogram
@@ -43,10 +43,9 @@ void PlotPairInvMass2D(const std::string& result_file_path = "slight.out") {
     }
 
     // Text information about amount of events
-    const char *events_info = Form("\\text{%i events}", results.n_events);
-    TLatex *events_info_text = new TLatex(0.55, 0.65, events_info);
+    const char* events_info = Form("\\text{%i events}", results.n_events);
+    TLatex* events_info_text = new TLatex(0.54, 0.80, events_info);
     events_info_text->SetNDC();
-    // events_info_text->SetTextSize(0.04); Leads sto seg fault
 
     // Create a canvas to draw on
     TCanvas* canvas = new TCanvas("canvas", "", 900, 700);
@@ -70,6 +69,6 @@ void PlotPairInvMass2D(const std::string& result_file_path = "slight.out") {
     events_info_text->Draw();
 
     // Save plot to TEX file
-    const std::string file_name = results.repr_str + std::string("_pair_inv_mass_2d.tex");
+    const std::string file_name = results.decay_repr_str + std::string("_pair_inv_mass_2d.tex");
     canvas->Print(file_name.c_str());
 }
