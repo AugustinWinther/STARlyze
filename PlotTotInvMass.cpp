@@ -14,19 +14,25 @@ void PlotTotInvMass(const std::string& result_file_path = "slight.out") {
     const char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s", 
                              results.sqrt_s_NN/1000, results.decay_latex_str.c_str());
 
+    // Create list of all invariant masses
+    std::vector<double> m_inv_list;
+    for (const Event& event : results.events) {
+        m_inv_list.push_back(event.m_inv);
+    }
+
     // Calculate histogram properties
-    const double min = std::min_element(results.m_inv_list.begin(), 
-                                        results.m_inv_list.end())[0];
-    const double max = std::max_element(results.m_inv_list.begin(), 
-                                        results.m_inv_list.end())[0];
-    const double bin_width = FreedmanDiaconisBinWidth(results.m_inv_list);
+    const double min = std::min_element(m_inv_list.begin(), 
+                                        m_inv_list.end())[0];
+    const double max = std::max_element(m_inv_list.begin(), 
+                                        m_inv_list.end())[0];
+    const double bin_width = FreedmanDiaconisBinWidth(m_inv_list);
     const int n_bins = (max - min)/bin_width;
 
     // Create histogram object
     TH1D *hist = new TH1D("hist", title, n_bins, min, max);
 
     // Fill histograms
-    for (const double& m_inv : results.m_inv_list) {
+    for (const double& m_inv : m_inv_list) {
         hist->Fill(m_inv);
     }
 

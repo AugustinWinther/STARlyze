@@ -6,6 +6,7 @@
 
 // Local Includes
 #include "starlyze.cpp" 
+#include <iostream>
 
 void PlotPairInvMass2D(const std::string& result_file_path = "slight.out") {
     // Read inn result
@@ -15,32 +16,38 @@ void PlotPairInvMass2D(const std::string& result_file_path = "slight.out") {
     const char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s", 
                              results.sqrt_s_NN/1000, results.decay_latex_str.c_str());
 
-    // Seperate particle pairs invariant mases
-    std::vector<double> m_inv_pair_1;
-    std::vector<double> m_inv_pair_2;
-    for (const std::vector<double>& m_inv_pairs : results.m_inv_pairs_list) {
-        m_inv_pair_1.push_back(m_inv_pairs[0]);
-        m_inv_pair_2.push_back(m_inv_pairs[1]);
+    // Seperate particle pairs invariant masses
+    std::vector<double> m_inv_pairs_1;
+    std::vector<double> m_inv_pairs_2;
+    for (const Event& event : results.events) {
+        m_inv_pairs_1.push_back(event.m_inv_pairs[0]);
+        m_inv_pairs_2.push_back(event.m_inv_pairs[1]);
     }
 
     // Create pair inv mass vs pair inv mass histogram
-    const double min_1 = std::min_element(m_inv_pair_1.begin(), m_inv_pair_1.end())[0];
-    const double max_1 = std::max_element(m_inv_pair_1.begin(), m_inv_pair_1.end())[0];
-    const double width_1 = FreedmanDiaconisBinWidth(m_inv_pair_1);
+    const double min_1 = std::min_element(m_inv_pairs_1.begin(), m_inv_pairs_1.end())[0];
+    const double max_1 = std::max_element(m_inv_pairs_1.begin(), m_inv_pairs_1.end())[0];
+    const double width_1 = FreedmanDiaconisBinWidth(m_inv_pairs_1);
     const int nbins_1 = (max_1 - min_1)/width_1;
 
-    const double min_2 = std::min_element(m_inv_pair_2.begin(), m_inv_pair_2.end())[0];
-    const double max_2 = std::max_element(m_inv_pair_2.begin(), m_inv_pair_2.end())[0];
-    const double width_2 = FreedmanDiaconisBinWidth(m_inv_pair_2);
+    const double min_2 = std::min_element(m_inv_pairs_2.begin(), m_inv_pairs_2.end())[0];
+    const double max_2 = std::max_element(m_inv_pairs_2.begin(), m_inv_pairs_2.end())[0];
+    const double width_2 = FreedmanDiaconisBinWidth(m_inv_pairs_2);
     const int nbins_2 = (max_2 - min_2)/width_2;
 
+    // Create histogram object
     TH2D* hist = new TH2D("hist", title, nbins_1, min_1, max_1, 
                                          nbins_2, min_2, max_2);
 
     // Fill histogram
     for (int i=0; i < results.n_events/2; i++) {
-        hist->Fill(m_inv_pair_1[i], m_inv_pair_2[i]);
+        hist->Fill(m_inv_pairs_1[i], m_inv_pairs_2[i]);
     }
+
+    // Get peak
+    const int bin_max = hist->GetMaximumBin();
+    const double hist_peak = hist->GetYaxis()->GetBinCenter(bin_max);
+    std::cout << hist_peak;
 
     // Text information about amount of events
     const char* events_info = Form("\\text{%i events}", results.n_events);

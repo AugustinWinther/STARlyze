@@ -226,8 +226,7 @@ class SimulationResult {
     double sqrt_s_NN;
     std::string decay_repr_str; 
     std::string decay_latex_str;
-    std::vector<double> m_inv_list, p_trans_list;
-    std::vector<std::vector<double>> m_inv_pairs_list, pseudo_raps_list;
+    std::vector<Event> events;
 
     SimulationResult(const std::vector<Event>& events, const int& decay_id,
                      const double& beam_1_gamma, const double& beam_2_gamma) {
@@ -242,12 +241,7 @@ class SimulationResult {
         const double beam_2_E_N = kPROTON_MASS*beam_2_gamma;
         this->sqrt_s_NN = beam_1_E_N + beam_2_E_N;
         
-        for (const Event& event : events) {
-            this->m_inv_list.push_back(event.m_inv);
-            this->m_inv_pairs_list.push_back(event.m_inv_pairs);
-            this->p_trans_list.push_back(event.p_trans);
-            this->pseudo_raps_list.push_back(event.pseudo_raps);
-        }
+        this->events = events;
     }
 };
 

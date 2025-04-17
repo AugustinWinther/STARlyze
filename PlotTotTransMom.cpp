@@ -14,19 +14,24 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     const char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s", 
                              results.sqrt_s_NN/1000, results.decay_latex_str.c_str());
 
+    // Create list of all invariant masses
+    std::vector<double> p_trans_list;
+    for (const Event& event : results.events) {
+        p_trans_list.push_back(event.p_trans);
+    }
+
     // Calculate histogram properties
-    const double min = std::min_element(results.p_trans_list.begin(), 
-                                        results.p_trans_list.end())[0];
-    const double max = std::max_element(results.p_trans_list.begin(), 
-                                        results.p_trans_list.end())[0];
-    const double bin_width = FreedmanDiaconisBinWidth(results.p_trans_list);
+    const double min = std::min_element(p_trans_list.begin(), 
+                                        p_trans_list.end())[0];
+    const double max = std::max_element(p_trans_list.begin(), 
+                                        p_trans_list.end())[0];
+    const double bin_width = FreedmanDiaconisBinWidth(p_trans_list);
     const int n_bins = (max - min)/bin_width;
 
-    // Create histogram object
     TH1D* hist = new TH1D("hist", title, n_bins, min, max);
 
     // Fill histograms
-    for (const double& p_trans : results.p_trans_list) {
+    for (const double& p_trans : p_trans_list) {
         hist->Fill(p_trans);
     }
 

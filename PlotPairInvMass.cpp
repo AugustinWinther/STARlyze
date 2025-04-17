@@ -14,28 +14,28 @@ void PlotPairInvMass(const std::string& result_file_path = "slight.out") {
     const char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s", 
                              results.sqrt_s_NN/1000, results.decay_latex_str.c_str());
 
-    // Collapse m_inv_pair_list to 1D vector
-    std::vector<double> inv_masses;
-    for (const std::vector<double>& m_inv_pairs : results.m_inv_pairs_list) {
-        for (const double& m_inv_pair : m_inv_pairs) {
-            inv_masses.push_back(m_inv_pair);
+    // Create list of all pair invariant masses
+    std::vector<double> m_inv_pairs_list;
+    for (const Event& event : results.events) {
+        for (const double& m_inv_pair : event.m_inv_pairs) {
+            m_inv_pairs_list.push_back(m_inv_pair);
         }
     }
 
     // Calculate histogram properties
-    const double min = std::min_element(inv_masses.begin(), 
-                                        inv_masses.end())[0];
-    const double max = std::max_element(inv_masses.begin(), 
-                                        inv_masses.end())[0];
-    const double bin_width = FreedmanDiaconisBinWidth(inv_masses);
+    const double min = std::min_element(m_inv_pairs_list.begin(), 
+                                        m_inv_pairs_list.end())[0];
+    const double max = std::max_element(m_inv_pairs_list.begin(), 
+                                        m_inv_pairs_list.end())[0];
+    const double bin_width = FreedmanDiaconisBinWidth(m_inv_pairs_list);
     const int n_bins = (max - min)/bin_width;
 
     // Create histogram object
     TH1D* hist = new TH1D("hist", title, n_bins, min, max);
 
     // Fill histograms
-    for (const double& m_inv : inv_masses) {
-        hist->Fill(m_inv);
+    for (const double& pair_inv_mass : m_inv_pairs_list) {
+        hist->Fill(pair_inv_mass);
     }
 
     // Calculate invariant mass peak and its FWHM
