@@ -35,10 +35,19 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
         hist->Fill(p_trans);
     }
 
+    // Calculate invariant mass peak and its FWHM
+    const int bin_max = hist->GetMaximumBin();
+    const double hist_peak = hist->GetXaxis()->GetBinCenter(bin_max);
+
     // Text information about amount of events
     const char* events_info = Form("\\text{%i events}", results.n_events);
     TLatex* events_info_text = new TLatex(0.54, 0.80, events_info);
     events_info_text->SetNDC();
+
+    // Text information about inv. mass. peak
+    const char* peak_info = Form("\\text{Peak @ %.1f MeV/c}^{2}", hist_peak*1000);
+    TLatex* peak_info_text = new TLatex(0.54, 0.75, peak_info);
+    peak_info_text->SetNDC();
 
     // Create a canvas to draw on
     TCanvas* canvas = new TCanvas("canvas", "", 900, 700);
@@ -61,6 +70,7 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     hist->SetFillColor(kP10Blue);
     hist->Draw();
     events_info_text->Draw();
+    peak_info_text->Draw();
 
     // Save plot to TEX file
     const std::string file_name = results.decay_repr_str + std::string("_tot_trans_mom.tex");

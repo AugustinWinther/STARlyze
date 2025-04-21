@@ -19,7 +19,6 @@ void PlotPseudoRap(const std::string& result_file_path = "slight.out") {
     // Create bar chart values
     std::string bar_str[5] = {"0","1","2","3","4"};
     int bar_val[5] = {0, 0, 0, 0, 0};;
-    int events_detected = 0;
     int particles_detected = 0;
     for (const Event& event : results.events) {
         // Count detected particles in event
@@ -34,7 +33,7 @@ void PlotPseudoRap(const std::string& result_file_path = "slight.out") {
         if (particles_detected == 1) {bar_val[1] += 1;}
         if (particles_detected == 2) {bar_val[2] += 1;}
         if (particles_detected == 3) {bar_val[3] += 1;}
-        if (particles_detected == 4) {bar_val[4] += 1; events_detected += 1;}
+        if (particles_detected == 4) {bar_val[4] += 1;}
     }
 
     // Create histogram to become barchart
@@ -52,7 +51,7 @@ void PlotPseudoRap(const std::string& result_file_path = "slight.out") {
     events_info_text->SetNDC();
 
     // Text information about events detected
-    const char* detect_info = Form("\\text{where %i fully detected}", events_detected);
+    const char* detect_info = Form("\\text{where %i fully detected}", bar_val[4]);
     TLatex* detect_info_text = new TLatex(0.54, 0.75, detect_info);
     detect_info_text->SetNDC();
 
@@ -61,9 +60,16 @@ void PlotPseudoRap(const std::string& result_file_path = "slight.out") {
     TLatex* accept_info_text = new TLatex(0.54, 0.70, accept_info);
     accept_info_text->SetNDC();
 
+    // Text information abour particles detected on top of all bars
+    TLatex* bar_0_text = new TLatex(0.25, bar_val[0]+25, Form("%i", bar_val[0]));
+    TLatex* bar_1_text = new TLatex(1.25, bar_val[1]+25, Form("%i", bar_val[1]));
+    TLatex* bar_2_text = new TLatex(2.25, bar_val[2]+25, Form("%i", bar_val[2]));
+    TLatex* bar_3_text = new TLatex(3.25, bar_val[3]+25, Form("%i", bar_val[3]));
+    TLatex* bar_4_text = new TLatex(4.32, bar_val[4]+25, Form("%i", bar_val[4]));
+
     // Create a canvas to draw on
     TCanvas* canvas = new TCanvas("canvas", "", 900, 700);
-    canvas->SetGrid();
+    canvas->SetGrid(0, 1);
 
     // Draw bar chart and info texts
     bar->SetStats(kFALSE);
@@ -86,6 +92,11 @@ void PlotPseudoRap(const std::string& result_file_path = "slight.out") {
     events_info_text->Draw();
     detect_info_text->Draw();
     accept_info_text->Draw();
+    bar_0_text->Draw();
+    bar_1_text->Draw();
+    bar_2_text->Draw();
+    bar_3_text->Draw();
+    bar_4_text->Draw();
 
     // Save plot to TEX file
     const std::string file_name = results.decay_repr_str + std::string("_pseudo_rap.tex");
