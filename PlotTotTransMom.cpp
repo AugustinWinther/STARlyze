@@ -45,7 +45,7 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     events_info_text->SetNDC();
 
     // Text information about inv. mass. peak
-    const char* peak_info = Form("\\text{Peak @ %.1f MeV/c}^{2}", hist_peak*1000);
+    const char* peak_info = Form("\\text{Peak @ %.1f MeV/c}", hist_peak*1000);
     TLatex* peak_info_text = new TLatex(0.54, 0.75, peak_info);
     peak_info_text->SetNDC();
 
