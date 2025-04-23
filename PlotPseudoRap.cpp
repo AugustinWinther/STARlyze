@@ -2,6 +2,8 @@
 #include "TH1D.h"
 #include "TCanvas.h"
 #include "TLatex.h"
+#include "TFile.h"
+#include "TColor.h"
 
 // Local Includes
 #include "starlyze.cpp" 
@@ -11,6 +13,14 @@ static constexpr double kPSEUDO_RAP_ACCEPT = 0.9;
 void PlotPseudoRap(const std::string& result_file_path = "slight.out") {
     // Read inn result
     const SimulationResult results = ReadSimulationResults(result_file_path);
+
+    // Create ROOT output file before any plotting
+    const std::string base_file_name = results.decay_repr_str 
+                                     + std::string("_") + std::to_string(results.n_events)
+                                     + std::string("_") + std::to_string(results.rnd_seed)
+                                     + std::string("_pseudo_rap");
+    const std::string root_file_name = base_file_name + std::string(".root");
+    TFile* root_file = new TFile(root_file_name.c_str(), "recreate");
 
     // Create title for plot
     const char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s; \\text{Event number}; \\text{Particles Detected}", 
@@ -56,20 +66,28 @@ void PlotPseudoRap(const std::string& result_file_path = "slight.out") {
     detect_info_text->SetNDC();
 
     // Text information acceptence rate
-    const char* accept_info = Form("\\text{Acceptence: } |\\eta| < %.1f", kPSEUDO_RAP_ACCEPT);
+    const char* accept_info = Form("\\text{Acceptance: } |\\eta| < %.1f", kPSEUDO_RAP_ACCEPT);
     TLatex* accept_info_text = new TLatex(0.54, 0.70, accept_info);
     accept_info_text->SetNDC();
 
     // Text information abour particles detected on top of all bars
-    TLatex* bar_0_text = new TLatex(0.25, bar_val[0]+25, Form("%i", bar_val[0]));
-    TLatex* bar_1_text = new TLatex(1.25, bar_val[1]+25, Form("%i", bar_val[1]));
-    TLatex* bar_2_text = new TLatex(2.25, bar_val[2]+25, Form("%i", bar_val[2]));
-    TLatex* bar_3_text = new TLatex(3.25, bar_val[3]+25, Form("%i", bar_val[3]));
-    TLatex* bar_4_text = new TLatex(4.32, bar_val[4]+25, Form("%i", bar_val[4]));
+    TLatex* bar_0_text = new TLatex(0.5, bar_val[0], Form("%i", bar_val[0]));
+    bar_0_text->SetTextAlign(21);
+    TLatex* bar_1_text = new TLatex(1.5, bar_val[1], Form("%i", bar_val[1]));
+    bar_1_text->SetTextAlign(21);
+    TLatex* bar_2_text = new TLatex(2.5, bar_val[2], Form("%i", bar_val[2]));
+    bar_2_text->SetTextAlign(21);
+    TLatex* bar_3_text = new TLatex(3.5, bar_val[3], Form("%i", bar_val[3]));
+    bar_3_text->SetTextAlign(21);
+    TLatex* bar_4_text = new TLatex(4.5, bar_val[4], Form("%i", bar_val[4]));
+    bar_4_text->SetTextAlign(21);
 
     // Create a canvas to draw on
     TCanvas* canvas = new TCanvas("canvas", "", 900, 700);
     canvas->SetGrid(0, 1);
+
+    // Change grid color
+    gStyle->SetGridColor(1);
 
     // Draw bar chart and info texts
     bar->SetStats(kFALSE);
@@ -99,6 +117,9 @@ void PlotPseudoRap(const std::string& result_file_path = "slight.out") {
     bar_4_text->Draw();
 
     // Save plot to TEX file
-    const std::string file_name = results.decay_repr_str + std::string("_pseudo_rap.tex");
+    const std::string file_name = base_file_name + std::string(".tex");
     canvas->Print(file_name.c_str());
+
+    // Save canvas object to ROOT file
+    canvas->Write();
 }

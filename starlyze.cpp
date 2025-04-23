@@ -6,7 +6,7 @@
 #include <sstream>   // std::istringstream
 #include <algorithm> // std::sort, std::shuffle
 
-// Constants 
+// Constants (same values as in STARlight 23. Apr. 2025)
 static constexpr double kELECTRON_MASS = 0.000510998928;
 static constexpr double kPROTON_MASS = 0.938272046;
 static constexpr double kMUON_MASS = 0.1056583755;
@@ -222,16 +222,19 @@ class Event {
 
 class SimulationResult {
     public:
+    int rnd_seed;
     int n_events;
     double sqrt_s_NN;
     std::string decay_repr_str; 
     std::string decay_latex_str;
     std::vector<Event> events;
 
-    SimulationResult(const std::vector<Event>& events, const int& decay_id,
-                     const double& beam_1_gamma, const double& beam_2_gamma) {
-        
-        // Used to display in plots
+    SimulationResult(const std::vector<Event>& events, const int& decay_id, 
+                     const int& rnd_seed, const double& beam_1_gamma, 
+                     const double& beam_2_gamma) {
+
+        // Used to display in plots and file names
+        this->rnd_seed = rnd_seed;
         this->n_events = events.size();
         this->decay_repr_str = DecayIdToReprStr(decay_id);
         this->decay_latex_str = DecayIdToLatexStr(decay_id);
@@ -248,7 +251,7 @@ class SimulationResult {
 SimulationResult ReadSimulationResults(const std::string& result_file_path) {
     // Variables for track and event values
     double m, px, py, pz, beam_1_gamma, beam_2_gamma;
-    int particle_id, decay_id;
+    int particle_id, decay_id, rnd_seed;
     std::vector<Track> tracks;
     std::vector<Event> events;
 
@@ -264,6 +267,7 @@ SimulationResult ReadSimulationResults(const std::string& result_file_path) {
 
         if (line_segments[0] == std::string("CONFIG_OPT:")) {
             decay_id = std::stoi(line_segments[2]);
+            rnd_seed = std::stoi(line_segments[6]);
         } 
         else if (line_segments[0] == std::string("BEAM_1:")) {
             beam_1_gamma = std::stod(line_segments[3]);
@@ -295,5 +299,5 @@ SimulationResult ReadSimulationResults(const std::string& result_file_path) {
     }
 
     result_file.close();
-    return SimulationResult(events, decay_id, beam_1_gamma, beam_2_gamma);
+    return SimulationResult(events, decay_id, rnd_seed, beam_1_gamma, beam_2_gamma);
 }

@@ -2,6 +2,7 @@
 #include "TH1D.h"
 #include "TCanvas.h"
 #include "TLatex.h"
+#include "TFile.h"
 
 // Local Includes
 #include "starlyze.cpp" 
@@ -9,6 +10,14 @@
 void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     // Read inn result
     const SimulationResult results = ReadSimulationResults(result_file_path);
+
+    // Create ROOT output file before any plotting
+    const std::string base_file_name = results.decay_repr_str 
+                                     + std::string("_") + std::to_string(results.n_events)
+                                     + std::string("_") + std::to_string(results.rnd_seed)
+                                     + std::string("_tot_trans_mom");
+    const std::string root_file_name = base_file_name + std::string(".root");
+    TFile* root_file = new TFile(root_file_name.c_str(), "recreate");
 
     // Create title for plot
     const char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s", 
@@ -38,6 +47,13 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     // Calculate invariant mass peak and its FWHM
     const int bin_max = hist->GetMaximumBin();
     const double hist_peak = hist->GetXaxis()->GetBinCenter(bin_max);
+    const double half_max = hist->GetMaximum() / 2.0;
+    int fwhm_left = bin_max;
+    int fwhm_right = bin_max;
+    while (hist->GetBinContent(fwhm_left) > half_max) fwhm_left--;
+    while (hist->GetBinContent(fwhm_right) > half_max) fwhm_right++;
+    const double fwhm = hist->GetXaxis()->GetBinCenter(fwhm_right) 
+                      - hist->GetXaxis()->GetBinCenter(fwhm_left);
 
     // Text information about amount of events
     const char* events_info = Form("\\text{%i events}", results.n_events);
@@ -48,6 +64,11 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     const char* peak_info = Form("\\text{Peak @ %.1f MeV/c}", hist_peak*1000);
     TLatex* peak_info_text = new TLatex(0.54, 0.75, peak_info);
     peak_info_text->SetNDC();
+
+    // Text information about inv. mass. FWHM
+    const char* fwhm_info = Form("\\text{FWHM = %.1f MeV/c}", fwhm*1000);
+    TLatex* fwhm_info_text = new TLatex(0.54, 0.70, fwhm_info);
+    fwhm_info_text->SetNDC();
 
     // Create a canvas to draw on
     TCanvas* canvas = new TCanvas("canvas", "", 900, 700);
@@ -71,8 +92,12 @@ void PlotTotTransMom(const std::string& result_file_path = "slight.out") {
     hist->Draw();
     events_info_text->Draw();
     peak_info_text->Draw();
+    fwhm_info_text->Draw();
 
     // Save plot to TEX file
-    const std::string file_name = results.decay_repr_str + std::string("_tot_trans_mom.tex");
-    canvas->Print(file_name.c_str());
+    const std::string tex_file_name = base_file_name + std::string(".tex");
+    canvas->Print(tex_file_name.c_str());
+
+    // Save canvas object to ROOT file
+    canvas->Write();
 }

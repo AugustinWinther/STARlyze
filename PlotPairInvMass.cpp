@@ -2,6 +2,7 @@
 #include "TH1D.h"
 #include "TCanvas.h"
 #include "TLatex.h"
+#include "TFile.h"
 
 // Local Includes
 #include "starlyze.cpp" 
@@ -9,6 +10,14 @@
 void PlotPairInvMass(const std::string& result_file_path = "slight.out") {
     // Read inn result
     const SimulationResult results = ReadSimulationResults(result_file_path);
+
+    // Create ROOT output file before any plotting
+    const std::string base_file_name = results.decay_repr_str 
+                                     + std::string("_") + std::to_string(results.n_events)
+                                     + std::string("_") + std::to_string(results.rnd_seed)
+                                     + std::string("_pair_inv_mass");
+    const std::string root_file_name = base_file_name + std::string(".root");
+    TFile* root_file = new TFile(root_file_name.c_str(), "recreate");
 
     // Create title for plot
     const char* title = Form("\\text{STARlight } | \\text{ Pb - Pb } \\sqrt{s_{NN}} = %.2f \\text{ TeV } | \\, %s", 
@@ -81,6 +90,9 @@ void PlotPairInvMass(const std::string& result_file_path = "slight.out") {
     peak_info_text->Draw();
 
     // Save plot to TEX file
-    const std::string file_name = results.decay_repr_str + std::string("_pair_inv_mass.tex");
-    canvas->Print(file_name.c_str());
+    const std::string tex_file_name = base_file_name + std::string(".tex");
+    canvas->Print(tex_file_name.c_str());
+
+    // Save canvas to ROOT file
+    canvas->Write();
 }
